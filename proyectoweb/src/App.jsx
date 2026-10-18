@@ -18,6 +18,9 @@ function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
+
+        {/* Ruta para cualquier URL desconocida (va siempre al final) */}
+        <Route path="*" element={<Home />} />
       </Routes>
     </>
   );
