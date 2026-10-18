@@ -19,7 +19,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
 
-        {/* Ruta para cualquier URL desconocida (va siempre al final) */}
+        {/* Ruta para cualquier URL desconocida */}
         <Route path="*" element={<Home />} />
       </Routes>
     </>
