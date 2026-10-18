@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
+import { SellosNutricionales } from '../components/SellosNutricionales'; // <-- 1. Importamos el componente de sellos
 
 export default function Home() {
   const { productos, agregarAlCarrito } = useCart();
@@ -39,10 +40,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      {/* Opción Alternativa: Si prefieres el color crema corporativo (#FFF5E1) en lugar de foto, cambia el style por:
-          style={{ backgroundColor: '#FFF5E1', color: '#5D4037' }}
-      */}
 
       {/* 2. Sección de Características / Beneficios */}
       <div className="container-xxl py-5">
@@ -104,8 +101,15 @@ export default function Home() {
                   </div>
                   <div className="text-center p-4 d-flex flex-column flex-grow-1">
                     <h5 className="mb-3 fw-bold">{prod.nombre}</h5>
-                    <span className="text-success fw-bold fs-5 mb-3">${Number(prod.precio).toLocaleString('es-CL')}</span>
-                    <p className="text-muted small mb-4 flex-grow-1">{prod.descripcion}</p>
+                    <span className="text-success fw-bold fs-5 mb-2">${Number(prod.precio).toLocaleString('es-CL')}</span>
+                    
+                    <p className="text-muted small mb-3 flex-grow-1">{prod.descripcion}</p>
+
+                    {/* 2. Insertamos los sellos nutricionales conectados a la API aquí */}
+                    <div className="d-flex justify-content-center mb-3">
+                      <SellosNutricionales nombreProducto={prod.nombre} />
+                    </div>
+
                     <div className="mt-auto">
                       <button 
                         className="btn btn-warning rounded-pill py-2 px-4 w-100 fw-bold text-dark shadow-sm"
@@ -124,5 +128,3 @@ export default function Home() {
     </div>
   );
 }
-
-
