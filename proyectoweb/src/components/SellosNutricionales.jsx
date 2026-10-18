@@ -9,7 +9,7 @@ export const SellosNutricionales = ({ nombreProducto }) => {
     const obtenerInformacionNutricional = async () => {
       try {
         setCargando(true);
-        // Consulta a la API de Open Food Facts por palabra clave
+        // Consulta dinámica a la API de Open Food Facts
         const response = await axios.get(
           `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(nombreProducto)}&search_simple=1&action=process&json=1`
         );
@@ -19,24 +19,40 @@ export const SellosNutricionales = ({ nombreProducto }) => {
           const nutriments = producto.nutriments || {};
           const nuevosSellos = [];
 
-          // Criterios aproximados Ley de Etiquetado (por cada 100g)
-          if (nutriments.sugars_100g > 10) nuevosSellos.push('ALTO EN AZÚCARES');
-          if (nutriments['saturated-fat_100g'] > 4) nuevosSellos.push('ALTO EN GRASAS SATURADAS');
-          if (nutriments.energy_100g > 275) nuevosSellos.push('ALTO EN CALORÍAS');
-          if (nutriments.sodium_100g > 0.4) nuevosSellos.push('ALTO EN SODIO');
+          if ((nutriments.sugars_100g || 0) > 10) nuevosSellos.push('ALTO EN AZÚCARES');
+          if ((nutriments['saturated-fat_100g'] || 0) > 4) nuevosSellos.push('ALTO EN GRASAS SATURADAS');
+          if ((nutriments.energy_100g || 0) > 275) nuevosSellos.push('ALTO EN CALORÍAS');
+          if ((nutriments.sodium_100g || 0) > 0.4) nuevosSellos.push('ALTO EN SODIO');
 
-          setSellos(nuevosSellos);
-        } else {
-          // Valores por defecto si la búsqueda no arroja resultados
-          setSellos(['ALTO EN AZÚCARES', 'ALTO EN CALORÍAS']);
+          // Si la API devolvió sellos, los usamos
+          if (nuevosSellos.length > 0) {
+            setSellos(nuevosSellos);
+            setCargando(false);
+            return;
+          }
         }
       } catch (error) {
         console.error('Error al consultar la API nutricional:', error);
-        // Valores por defecto en caso de error de red
-        setSellos(['ALTO EN AZÚCARES', 'ALTO EN CALORÍAS']);
-      } finally {
-        setCargando(false);
       }
+
+      // Si la API no trae datos específicos, asignamos sellos dinámicos según el tipo de producto
+      const nombreLower = nombreProducto.toLowerCase();
+      const sellosPersonalizados = [];
+
+      if (nombreLower.includes('manjar') || nombreLower.includes('caramelo') || nombreLower.includes('dulce')) {
+        sellosPersonalizados.push('ALTO EN AZÚCARES', 'ALTO EN CALORÍAS');
+      } else if (nombreLower.includes('chocolate') || nombreLower.includes('trufa') || nombreLower.includes('crema')) {
+        sellosPersonalizados.push('ALTO EN AZÚCARES', 'ALTO EN GRASAS SATURADAS', 'ALTO EN CALORÍAS');
+      } else if (nombreLower.includes('fruta') || nombreLower.includes('piña') || nombreLower.includes('durazno')) {
+        sellosPersonalizados.push('ALTO EN AZÚCARES');
+      } else if (nombreLower.includes('hojarasca') || nombreLower.includes('galleta')) {
+        sellosPersonalizados.push('ALTO EN CALORÍAS', 'ALTO EN GRASAS SATURADAS');
+      } else {
+        sellosPersonalizados.push('ALTO EN AZÚCARES', 'ALTO EN CALORÍAS');
+      }
+
+      setSellos(sellosPersonalizados);
+      setCargando(false);
     };
 
     if (nombreProducto) {
@@ -45,13 +61,17 @@ export const SellosNutricionales = ({ nombreProducto }) => {
   }, [nombreProducto]);
 
   if (cargando) {
-    return <small className="text-muted">Cargando información nutricional...</small>;
+    return <small className="text-muted">Cargando sellos...</small>;
   }
 
   return (
-    <div className="d-flex flex-wrap gap-1 my-2">
+    <div className="d-flex flex-wrap justify-content-center gap-1 my-2">
       {sellos.map((sello, index) => (
-        <span key={index} className="badge bg-dark text-white border border-secondary p-1" style={{ fontSize: '0.7rem' }}>
+        <span
+          key={index}
+          className="badge bg-dark text-white border border-secondary p-1"
+          style={{ fontSize: '0.65rem', textTransform: 'uppercase' }}
+        >
           {sello}
         </span>
       ))}
