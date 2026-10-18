@@ -17,7 +17,7 @@ const renderLogin = () => {
 describe('Login Component Unit Tests', () => {
   it('debe renderizar el título y los campos de texto', () => {
     renderLogin();
-    expect(screen.getByText(/Iniciar Sesión/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Iniciar Sesión/i })).toBeInTheDocument();
     expect(screen.getByPlaceholderText('ejemplo@duoc.cl')).toBeInTheDocument();
   });
 

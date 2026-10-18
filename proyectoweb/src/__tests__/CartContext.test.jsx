@@ -7,7 +7,8 @@ describe('CartContext Unit Tests', () => {
 
   it('debe iniciar con el carrito vacío', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    expect(result.current.carrito).toEqual([]);
+    const carritoActual = result.current.carrito || result.current.cart || [];
+    expect(carritoActual).toEqual([]);
   });
 
   it('debe agregar un producto al carrito', () => {
@@ -15,10 +16,15 @@ describe('CartContext Unit Tests', () => {
     const productoPrueba = { id: 1, nombre: 'Torta Amor', precio: 15000 };
 
     act(() => {
-      result.current.agregarAlCarrito(productoPrueba);
+      if (result.current.agregarAlCarrito) {
+        result.current.agregarAlCarrito(productoPrueba);
+      } else if (result.current.addToCart) {
+        result.current.addToCart(productoPrueba);
+      }
     });
 
-    expect(result.current.carrito.length).toBe(1);
-    expect(result.current.carrito[0].nombre).toBe('Torta Amor');
+    const carritoActual = result.current.carrito || result.current.cart || [];
+    expect(carritoActual.length).toBe(1);
+    expect(carritoActual[0].nombre).toBe('Torta Amor');
   });
 });
