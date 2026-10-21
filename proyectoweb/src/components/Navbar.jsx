@@ -8,8 +8,8 @@ export default function Navbar() {
   const { usuarioLogueado, logoutUsuario } = useAuth();
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div className="container">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100">
+      <div className="container-fluid px-4">
         <Link className="navbar-brand font-weight-bold" to="/">
           🍰 Mil Sabores
         </Link>
