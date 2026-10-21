@@ -1,0 +1,18 @@
+
+
+:root {
+  --bs-primary: #8B4513;
+  --bs-secondary: #FFCOCB;
+  --bs-light: #FFF5E1;
+}
+
+body {
+  background-color: #FFF5E1 !important;
+  color: #5D4037 !important;
+  font-family: 'Lato', sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+  font-family: 'Pacifico', cursive !important;
+  color: #8B4513 !important;
+}
