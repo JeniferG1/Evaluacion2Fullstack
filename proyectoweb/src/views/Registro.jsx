@@ -1,124 +1,123 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Registro() {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
+  const [mensaje, setMensaje] = useState('');
 
-  const [error, setError] = useState('');
   const { registrarUsuario } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  // Función para calcular la edad exacta en años
+  const calcularEdad = (fechaNac) => {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNac);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { nombre, email, password, confirmPassword } = formData;
 
-    if (!nombre.trim() || !email.trim() || !password || !confirmPassword) {
-      setError('Todos los campos son obligatorios.');
+    if (!fechaNacimiento) {
+      setMensaje('Por favor, ingresa tu fecha de nacimiento.');
       return;
     }
 
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
-      return;
-    }
+    const edad = calcularEdad(fechaNacimiento);
+    const tieneDescuentoSenior = edad >= 50;
 
-    if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden.');
-      return;
-    }
+    const nuevoUsuario = {
+      nombre,
+      email,
+      password,
+      fechaNacimiento,
+      edad,
+      esSenior: tieneDescuentoSenior,
+      descuento: tieneDescuentoSenior ? 0.50 : 0 // 50% de descuento si tiene 50+ años
+    };
 
-    const resultado = registrarUsuario({ nombre, email, password });
+    registrarUsuario(nuevoUsuario);
 
-    if (resultado.success) {
-      alert(resultado.message);
-      navigate('/login');
+    if (tieneDescuentoSenior) {
+      alert('Por ser mayor de 50 años tienes un 50% de descuento en todos tus productos.');
     } else {
-      setError(resultado.message);
+      alert('¡Cuenta creada con éxito!');
     }
+
+    navigate('/');
   };
 
   return (
-    <div className="container my-5">
+    <div className="container py-5">
       <div className="row justify-content-center">
         <div className="col-md-6 col-lg-5">
-          <div className="card shadow-sm p-4">
-            <h3 className="text-center mb-4 text-dark">Crear Cuenta 🎂</h3>
-
-            {error && <div className="alert alert-danger py-2">{error}</div>}
+          <div className="card shadow-sm border-0 rounded-3 p-4 bg-white">
+            <h2 className="text-center fw-bold mb-4">Crear Cuenta 🍰</h2>
+            
+            {mensaje && <div className="alert alert-warning">{mensaje}</div>}
 
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="form-label">Nombre Completo</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  className="form-control"
-                  placeholder="Tu nombre"
-                  value={formData.nombre}
-                  onChange={handleChange}
+                <label className="form-label fw-semibold">Nombre Completo</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  required 
+                  value={nombre} 
+                  onChange={(e) => setNombre(e.target.value)} 
                 />
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Correo Electrónico</label>
-                <input
-                  type="email"
-                  name="email"
-                  className="form-control"
-                  placeholder="nombre@ejemplo.com"
-                  value={formData.email}
-                  onChange={handleChange}
+                <label className="form-label fw-semibold">Correo Electrónico</label>
+                <input 
+                  type="email" 
+                  className="form-control" 
+                  required 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
                 />
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Contraseña</label>
-                <input
-                  type="password"
-                  name="password"
-                  className="form-control"
-                  placeholder="Mínimo 6 caracteres"
-                  value={formData.password}
-                  onChange={handleChange}
+                <label className="form-label fw-semibold">Fecha de Nacimiento</label>
+                <input 
+                  type="date" 
+                  className="form-control" 
+                  required 
+                  value={fechaNacimiento} 
+                  onChange={(e) => setFechaNacimiento(e.target.value)} 
                 />
+                <small className="text-muted">
+                  👵 Si tienes 50 años o más, obtendrás automáticamente un 50% de descuento.
+                </small>
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Confirmar Contraseña</label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  className="form-control"
-                  placeholder="Repite tu contraseña"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
+                <label className="form-label fw-semibold">Contraseña</label>
+                <input 
+                  type="password" 
+                  className="form-control" 
+                  required 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
                 />
               </div>
 
-              <button type="submit" className="btn btn-success w-100 mt-2 fw-bold">
+              <button type="submit" className="btn btn-warning w-100 fw-bold py-2 rounded-pill mt-3">
                 Registrarse
               </button>
             </form>
-
-            <hr className="my-4" />
-            <div className="text-center">
-              <small className="text-muted">
-                ¿Ya tienes una cuenta? <Link to="/login">Inicia sesión</Link>
-              </small>
-            </div>
           </div>
         </div>
       </div>

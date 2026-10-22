@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 export default function Carrito() {
@@ -15,6 +16,7 @@ export default function Carrito() {
     mensajeCupon,
   } = useCart();
 
+  const { usuarioLogueado } = useAuth();
   const [inputCupon, setInputCupon] = useState('');
 
   const handleCuponSubmit = (e) => {
@@ -22,7 +24,15 @@ export default function Carrito() {
     aplicarCupon(inputCupon);
   };
 
-  if (cart.length === 0) {
+  // Cálculo del Descuento Senior (50% de descuento si el usuario es mayor de 50 años)
+  const tieneDescuentoSenior = Boolean(usuarioLogueado?.esSenior || usuarioLogueado?.descuento === 0.5);
+  const descuentoSeniorMonto = tieneDescuentoSenior ? subtotal * 0.5 : 0;
+
+  // Total final considerando cupones previos y el descuento Senior
+  const totalDescuentosAcumulados = (totalDescuento || 0) + descuentoSeniorMonto;
+  const totalPagar = Math.max(0, subtotal - totalDescuentosAcumulados);
+
+  if (!cart || cart.length === 0) {
     return (
       <div className="container-xxl py-5">
         <div className="container text-center py-5">
@@ -41,7 +51,7 @@ export default function Carrito() {
   return (
     <div className="container-xxl py-5">
       <div className="container">
-        {/* Título de la sección estilo plantilla */}
+        {/* Título de la sección */}
         <div className="text-center mx-auto mb-5" style={{ maxWidth: '600px' }}>
           <h1 className="display-6 mb-3 fw-bold">Carrito de Compras 🛒</h1>
           <p className="text-muted">Revisa tus productos seleccionados antes de proceder al pago</p>
@@ -149,17 +159,36 @@ export default function Carrito() {
                 <span className="text-muted">Subtotal:</span>
                 <span className="fw-bold">${subtotal.toLocaleString('es-CL')}</span>
               </div>
+
+              {/* Muestra Descuento por Cupón si existe */}
               {totalDescuento > 0 && (
                 <div className="d-flex justify-content-between text-success mb-2">
-                  <span>Descuento aplicado:</span>
+                  <span>Descuento Cupón:</span>
                   <span className="fw-bold">-${totalDescuento.toLocaleString('es-CL')}</span>
                 </div>
               )}
+
+              {/* Muestra Descuento Senior (50%) si aplica */}
+              {tieneDescuentoSenior && (
+                <div className="d-flex justify-content-between text-success mb-2">
+                  <span>Descuento Senior (50%):</span>
+                  <span className="fw-bold">-${descuentoSeniorMonto.toLocaleString('es-CL')}</span>
+                </div>
+              )}
+
               <hr />
               <div className="d-flex justify-content-between h5 fw-bold mb-4">
                 <span>Total:</span>
-                <span className="text-primary">${total.toLocaleString('es-CL')}</span>
+                <span className="text-primary">${totalPagar.toLocaleString('es-CL')}</span>
               </div>
+
+              {/* Notificación visual del beneficio senior */}
+              {tieneDescuentoSenior && (
+                <div className="badge bg-success text-wrap p-2 mb-3">
+                  🎉 ¡50% de Descuento Senior aplicado por ser mayor de 50 años!
+                </div>
+              )}
+
               <button
                 className="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm"
                 onClick={() => alert('¡Gracias por tu compra en Mil Sabores!')}
